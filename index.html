@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main">
+        <div class="top">
+            <div class="block">
+                <p>Text Color Picker</p>
+                <input class="control" type="color" id="colorPicker"/>
+            </div>
+            <div class="block">
+                <p>Background</p>
+                <input class="control" type="color" id="canvasColor"/>
+            </div>
+            <div class="block">
+                <p>Font Size</p>
+                <select class="control" id="fontPicker">
+                    <option value="1px">1px</option>
+                    <option value="5px">5px</option>
+                    <option value="10px">10px</option>
+                    <option value="20px">20px</option>
+                    <option value="50px">50px</option>
+                </select>
+            </div>
+        </div>
+        <canvas class="canvas" id="myCanvas" width="800" height="500">
+
+        </canvas>
+        <div class="bottom">
+            <button type="button" class="btn" id="clearButton">Clear</button>
+            <button type="button" class="btn" id="saveButton">Save & Download</button>
+            <button type="button" class="btn" id="retrieveButton">Retrieve saved Signature</button>
+        </div>
+    </div>
+    <script>
+        const colorPicker = document.getElementById('colorPicker');
+        const canvasColor = document.getElementById('canvasColor');
+        const fontPicker = document.getElementById('fontPicker');
+        const canvas = document.getElementById('myCanvas');
+        const clearButton = document.getElementById('clearButton');
+        const saveButton = document.getElementById('saveButton');
+        const retrieveButton = document.getElementById('retrieveButton');
+        const ctx = canvas.getContext('2d');
+
+        colorPicker.addEventListener('change', (e) => {
+            ctx.fillStyle = e.target.value;
+            ctx.strokeStyle = e.target.value;
+        });
+
+        canvasColor.addEventListener('change', (e) => {
+            ctx.fillStyle = e.target.value;
+            ctx.fillRect(0, 0, 800, 500);
+        })
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            lastX = e.offsetX;
+            lastY = e.offsetY;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if(isDrawing){
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+
+                lastX = e.offsetX;
+                lastY = e.offsetY;
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            isDrawing = false;
+        });
+
+        fontPicker.addEventListener('change', (e) => {
+            ctx.lineWidth = parseInt(e.target.value);
+
+        });
+
+        clearButton.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        saveButton.addEventListener('click', () => {
+            localStorage.setItem('canvasContents', canvas.toDataURL());
+
+            let link = document.createElement('a');
+            link.download = 'my-canvas.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
+        retrieveButton.addEventListener('click', () => {
+            let savedCanvas = localStorage.getItem('canvasContents');
+
+            if(savedCanvas){
+                let img = new Image();
+                img.src = savedCanvas;
+                ctx.drawImage(img, 0, 0);
+            }
+        });
+
+    </script>
+</body>
+</html>
